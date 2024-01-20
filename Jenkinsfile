@@ -4,12 +4,12 @@ pipeline {
     stages {
         stage('Hello') {
             steps {
-                echo 'Hello from github-hook triger'
+                echo 'Hello from GitHub hook trigger'
             }
         }
         stage('Build') {
             steps {
-                echo 'Building....'
+                echo 'Building'
             }
         }
         stage('Deploy') {
@@ -20,18 +20,29 @@ pipeline {
                     credentialsId: 'MyAWS',
                     accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                     secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]){
-                        sh(script: 'aws s3 cp /var/lib/jenkins/workspace/JenkinsPipeline/index.html s3://test-env-jenkins-myoga/')
+                        sh(script: 'aws s3 cp FilePath(FROM) S3Path(TO)')
                 }
             }
         }
         stage('Test') {
             steps {
-                echo 'Testing...'
+                echo 'Testing'
+                script {
+                    def url = 'https://test-env-jenkins-myoga.s3.ap-northeast-1.amazonaws.com/index.html'
+                    def response = sh(script: "curl -s -o /dev/null -w '%{http_code}' '$url'", returnStdout: true)
+
+                    if (response == '200') {
+                        echo 'Test OK'
+                    } else {
+                        echo response
+                        error 'Test NG'
+                    }
+                }
             }
         }
         stage('Release') {
             steps {
-                echo 'Release'
+                echo 'Releasing'
             }
         }
     }
